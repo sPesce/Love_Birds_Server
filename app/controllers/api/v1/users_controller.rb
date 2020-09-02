@@ -11,6 +11,15 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def find
+    user = find_user
+    if user
+      render json: UserSerializer.new(user).serialized_json
+    else
+      render json: {error: "Invalid Token, no user found."}
+    end
+  end
+
   private
   def initial_user_params
     params.require(:user).permit(:email,:password,:caretaker)  
