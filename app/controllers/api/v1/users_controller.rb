@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   def create
-    user = User.new_initial(initial_user_params)
+    user = User.new_initial(user_params)
     if user.valid?
       #seperate from model validations, 
       user.validated = false
@@ -20,9 +20,23 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def update
+    user = find_user
+    if user      
+      user.assign_attributes(user_params)
+    end
+
+    return  render json: {error: "Invalid Token, no user found."} unless user.valid?
+
+    user.save
+
+    render json: UserSerializer.new(user).serialized_json
+        
+  end
+
   private
-  def initial_user_params
-    params.require(:user).permit(:email,:password,:caretaker)  
+  def user_params
+    params.require(:user).permit(:email,:password,:caretaker,:first,:last,:bio,:zip_code)  
   end
   
 end
