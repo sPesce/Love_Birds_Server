@@ -4,4 +4,5 @@ class UserSerializer
   attribute :account_complete do |user|
     user.is_complete?
   end
+  has_many :disabilities
 end

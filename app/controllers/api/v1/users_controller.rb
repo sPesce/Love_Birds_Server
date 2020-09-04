@@ -30,7 +30,7 @@ class Api::V1::UsersController < ApplicationController
 
     user.save
 
-    render json: UserSerializer.new(user).serialized_json
+    render json: UserSerializer.new(user, {include: [:disabilities]}).serialized_json
         
   end
 
