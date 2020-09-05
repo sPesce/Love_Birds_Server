@@ -4,6 +4,7 @@ Rails.application.routes.draw do
         get 'find_user' => 'users#find'
         patch 'users/update' => 'users#update'
         resources :disabilities, only: [:index,:create]
+        resources :interests, only: [:create]
 
         resources :users
       end

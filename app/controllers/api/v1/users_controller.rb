@@ -14,7 +14,8 @@ class Api::V1::UsersController < ApplicationController
   def find
     user = find_user
     if user
-      render json: UserSerializer.new(user).serialized_json
+      options = {include: [:disabilities,:interests]}
+      render json: UserSerializer.new(user,options).serialized_json
     else
       render json: {error: "Invalid Token, no user found."}
     end
@@ -29,8 +30,9 @@ class Api::V1::UsersController < ApplicationController
     return  render json: {error: "Invalid Token, no user found."} unless user.valid?
 
     user.save
-
-    render json: UserSerializer.new(user, {include: [:disabilities]}).serialized_json
+    options = {include: [:disabilities]}
+    
+    render json: UserSerializer.new(user, options).serialized_json
         
   end
 

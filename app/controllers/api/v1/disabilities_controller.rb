@@ -10,11 +10,12 @@ class Api::V1::DisabilitiesController < ApplicationController
   def create
     user = find_user
     user.disabilities.build(name: disability_params[:disability].downcase)
+    user.validated = false;
 
     return  render json: {error: "Invalid disability"} unless user.valid?
 
     user.save
-    render json: user.disabilities, only: [:name]
+    render json: DisabilitySerializer.new(user.disabilities).serialized_json
     
   end
 
