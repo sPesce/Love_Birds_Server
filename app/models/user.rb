@@ -1,4 +1,14 @@
 class User < ApplicationRecord
+  before_save do |user|
+    if(user.zip_code)
+      location = Location.find_by(zip: user.zip_code)
+      if(location)
+        user.location = Location.find_by(zip: user.zip_code)
+        
+      end
+    end
+  end
+
   has_secure_password
 
   has_one :user_caretaker
@@ -12,6 +22,10 @@ class User < ApplicationRecord
 
   has_many :matches
   has_many :matched_user, through: :matches
+
+  belongs_to :location, optional: true
+
+  has_one_attached :main_image
 
 
   def self.new_initial(params)    
@@ -32,6 +46,8 @@ class User < ApplicationRecord
       return false
     end
   end
+
+ 
 
   
 
