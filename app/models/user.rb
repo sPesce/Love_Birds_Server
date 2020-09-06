@@ -46,6 +46,24 @@ class User < ApplicationRecord
       return false
     end
   end
+  #distance in miles from self to another user
+  def distance_to(other_user)
+    locations = [self,other_user].map{|usr| [usr.location.lat,usr.location.long]}    
+    Geocoder::Calculations.distance_between(locations[0],locations[1])    
+  end
+
+  #get closest other users, if radius given, then only get ppl close enough
+  def get_closest(radius = nil)  
+    users = User.all.select{|usr| constraints(radius,usr)}
+    users.sort_by{|usr| self.distance_to(usr)}
+  end
+
+  private
+  #used in get_closest, just adds radius to query
+  def constraints(radius = nil,user)
+    return (self.id != user.id && self.distance_to(user) <= radius) if (radius)    
+    return (self.id != user.id)
+  end
 
  
 
