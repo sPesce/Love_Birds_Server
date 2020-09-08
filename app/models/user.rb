@@ -27,6 +27,13 @@ class User < ApplicationRecord
 
   has_one_attached :main_image
 
+  #because a user can either be the user or the caretaker in user caretaker,
+  #this method should be used to find a user_caretaker from a user
+  def find_user_caretaker
+    uc = UserCaretaker.find_by(user_id: self.id)#self is a standard user
+    return uc unless !uc
+    return UserCaretaker.find_by(caretaker_id: self.id)#self is a caretaker
+  end
 
   def self.new_initial(params)    
     caretaker,email,password = params.values_at(:caretaker,:email,:password)
@@ -56,6 +63,12 @@ class User < ApplicationRecord
   def get_closest(radius = nil)  
     users = User.all.select{|usr| constraints(radius,usr)}
     users.sort_by{|usr| self.distance_to(usr)}
+  end
+
+  def caretaker_of
+    uc = UserCaretaker.find_by(caretaker_id: self.id)
+    return nil unless (uc && uc.user)
+    return uc.user
   end
 
   private
