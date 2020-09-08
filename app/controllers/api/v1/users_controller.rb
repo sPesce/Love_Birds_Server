@@ -65,6 +65,14 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def accept_caretaker
+    user = find_user
+    uc = user.find_user_caretaker
+    uc.accepted = "BOTH"
+    uc.save
+    return render json: UserCaretakerSerializer.new(uc).serialize
+  end
+
   def caretaker_request
     user = find_user
     return render json: {error: "Invalid Token, no user found"} unless user
@@ -81,7 +89,7 @@ class Api::V1::UsersController < ApplicationController
       return render json: {error: "The requested user cannot be a caretaker"}
     end
     
-    uc = UserCaretaker.new(accepted: false)
+    uc = UserCaretaker.new(accepted: user.email)
     #user should be standard user, caretaker should be caretaker user
     uc.user = user.account_type == 'standard' ? user : user2
     uc.caretaker = user.account_type == 'standard' ? user2 : user

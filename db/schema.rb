@@ -86,7 +86,7 @@ ActiveRecord::Schema.define(version: 2020_09_07_202442) do
     t.integer "control_level"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.boolean "accepted"
+    t.string "accepted"
   end
 
   create_table "user_disabilities", force: :cascade do |t|
