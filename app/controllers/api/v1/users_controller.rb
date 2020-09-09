@@ -36,6 +36,9 @@ class Api::V1::UsersController < ApplicationController
 
   def update
     user = find_user
+    if user.first != user_params[:first] || user.last != user_params[:last]
+      user.validated = false;
+    end
     if user      
       user.assign_attributes(user_params)
     end
@@ -60,8 +63,9 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: matches.to_json(:include => 
       {
-        :interests => {:only => [:name]}
-      }, only: [:first,:last,:bio,:zip_code])
+        :interests => {:only => [:name]},
+        :disabilities => {:only => [:name]}
+      }, only: [:first,:last,:bio,:zip_code,:pic])
     end
   end
 

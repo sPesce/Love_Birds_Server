@@ -22,7 +22,6 @@ class ApplicationController < ActionController::API
       rescue 
           user = nil
       end
-      byebug unless user
       render json: {error: "Please log in"} unless user
   end
 
