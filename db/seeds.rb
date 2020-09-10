@@ -8,18 +8,30 @@
 require 'csv'
 require 'faker'
 
-location = Location.first
-if(!location)
-  CSV.foreach(Rails.root.join('lib/locations_seeds.csv'), headers: true) do |row|
-    Location.create( {
-      zip: row["ZIP"], 
-      lat: row["LAT"],
-      long: row["LNG"]
-    } ) 
-  end
-end
 
-[UserInterest,UserDisability,UserCaretaker,Interest,Disability,User].each{|table| table.destroy_all}
+if(!Location.all[0])
+  puts "seeding locations, this may take a minute..."
+  CSV.foreach(Rails.root.join('lib/locations_seeds.csv'), headers: true) do |row|
+      Location.create( {
+        zip: row["ZIP"], 
+        lat: row["LAT"],
+        long: row["LNG"]
+      } )   
+  end
+  puts "finished seeding locations"
+else
+  puts 'skipping seeding locations because it takes forever and its never edited'
+end
+puts 'destroying tables'
+[
+  UserInterest,
+  UserDisability,
+  UserCaretaker,
+  Interest,
+  Disability,
+  Match,
+  User
+].each{|table| table.destroy_all}
 #generate standard users
 zipCodes =
 [
@@ -33,6 +45,7 @@ zipCodes =
   '22305', '22306', '22307'
   
 ]
+puts "checking zip code errors..."
 errors = []
 zipCodes.each do |code|
   if !Location.find_by(zip: code)
@@ -44,6 +57,8 @@ if !errors.empty?
   puts '- Remove the following entries from zipCodes in seed file: '
   errors.each{|err| puts err}
   puts '\n--------------------------'
+else
+puts "...everything looks fine"
 end
 
 #-----------users interests disabilities ---------------------------
@@ -105,18 +120,25 @@ def match(male,other)
   end
 end
 
+puts 'seeding caretakers...'
 60.times do |n|
+  if(n == 10)
+    puts '>'
+    puts 'seeding girls and guys'
+  end
   if(n<10)
     caretributes =
     {
-      first: Faker::Name.first_name,
+      first: Faker::Name.unique.first_name,
       last: Faker::Name.last_name,
       email: Faker::Internet.unique.safe_email,
       password: 'care',
       validated: true,
       account_type: 'caretaker'
     }
-    User.create(caretributes)
+    u = User.new(caretributes)
+    u.email = u.first + '@gmail.com'
+    u.save 
   end
 
   male = (n <= 31)
@@ -126,7 +148,7 @@ end
   {
     validated: true,
     account_type: 'standard',
-    first: male ? Faker::Name.male_first_name : Faker::Name.female_first_name,
+    first: male ? Faker::Name.unique.male_first_name : Faker::Name.female_first_name,
     last: Faker::Name.last_name,
     email: Faker::Internet.unique.safe_email,
     password: 'qweasd123',
@@ -136,6 +158,8 @@ end
   }
   u = User.new(attributes)
   u.pic = pic_address('',u.gender,n)
+  u.email = u.first + '@gmail.com'
+  u.save
   
   myInterests = []
   rand(2..5).times do
@@ -176,5 +200,28 @@ end
 
   u.bio = myBio
   u.save
+  if(!u.location)
+    u.destroy
+    puts "#{n}th record created was bad and needs to be destroyed!"
+  end
+  if (n % 5) 
+    print '-'
+  end
 end
+print '>'
 
+puts 'seeding matches'
+reciever = User.all[15]
+senders = reciever.get_closest[1..10]
+
+senders.each do |s|
+  Match.create(user_id: s.id,
+  matched_user_id: reciever.id,
+  sender_status: 2,
+  reciever_status: 0)
+end
+puts "15th user got 10 match requests from his closest potential matches"
+
+puts '-------------------------------------------------'
+puts '-----------SEEDING-------Successfull-------------'
+puts '-------------------------------------------------'

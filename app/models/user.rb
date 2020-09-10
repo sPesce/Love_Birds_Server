@@ -21,11 +21,14 @@ class User < ApplicationRecord
   has_many :interests, through: :user_interests
 
   has_many :matches
-  has_many :matched_users, through: :matches
 
   belongs_to :location, optional: true
 
   has_one_attached :main_image
+
+  def matched_users
+    Match.where(user_id: self.id) + Match.where(matched_user_id: self.id)
+  end
 
   #because a user can either be the user or the caretaker in user caretaker,
   #this method should be used to find a user_caretaker from a user
@@ -54,8 +57,7 @@ class User < ApplicationRecord
       self.bio &&
       self.zip_code &&
       self.gender &&
-      self.match_gender &&
-      self.pic
+      self.match_gender
         )
     else
       return false

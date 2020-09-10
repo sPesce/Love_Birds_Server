@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_09_150337) do
+ActiveRecord::Schema.define(version: 2020_09_10_012745) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,13 +34,6 @@ ActiveRecord::Schema.define(version: 2020_09_09_150337) do
     t.string "checksum", null: false
     t.datetime "created_at", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
-  end
-
-  create_table "chats", force: :cascade do |t|
-    t.bigint "match_id", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["match_id"], name: "index_chats_on_match_id"
   end
 
   create_table "disabilities", force: :cascade do |t|
@@ -70,14 +63,12 @@ ActiveRecord::Schema.define(version: 2020_09_09_150337) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "messages", force: :cascade do |t|
+  create_table "messages_tables", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "chat_id", null: false
+    t.bigint "match_id", null: false
     t.string "body"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["chat_id"], name: "index_messages_on_chat_id"
-    t.index ["user_id"], name: "index_messages_on_user_id"
+    t.index ["match_id"], name: "index_messages_tables_on_match_id"
+    t.index ["user_id"], name: "index_messages_tables_on_user_id"
   end
 
   create_table "user_caretakers", force: :cascade do |t|
@@ -127,9 +118,8 @@ ActiveRecord::Schema.define(version: 2020_09_09_150337) do
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "chats", "matches"
-  add_foreign_key "messages", "chats"
-  add_foreign_key "messages", "users"
+  add_foreign_key "messages_tables", "matches"
+  add_foreign_key "messages_tables", "users"
   add_foreign_key "user_disabilities", "disabilities"
   add_foreign_key "user_disabilities", "users"
   add_foreign_key "user_interests", "interests"
