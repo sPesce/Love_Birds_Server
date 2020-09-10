@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_09_003137) do
+ActiveRecord::Schema.define(version: 2020_09_09_150337) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -62,8 +62,8 @@ ActiveRecord::Schema.define(version: 2020_09_09_003137) do
   end
 
   create_table "matches", force: :cascade do |t|
-    t.integer "sender"
-    t.integer "reciever"
+    t.integer "user_id"
+    t.integer "matched_user_id"
     t.integer "sender_status"
     t.integer "reciever_status"
     t.datetime "created_at", precision: 6, null: false
@@ -122,7 +122,6 @@ ActiveRecord::Schema.define(version: 2020_09_09_003137) do
     t.bigint "location_id"
     t.string "gender"
     t.string "match_gender"
-    t.integer "pic_id"
     t.string "pic"
     t.index ["location_id"], name: "index_users_on_location_id"
   end

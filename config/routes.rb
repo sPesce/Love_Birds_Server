@@ -8,11 +8,15 @@ Rails.application.routes.draw do
         get 'caretaker_remove' => 'users#caretaker_remove'
         get 'caretaker' => 'users#caretaker'
         patch 'accept_caretaker' => 'users#accept_caretaker'
+        post 'send_match' => 'users#initialize_match'
+        patch 'matches/accept/' => 'matches#accept_match'
+
 
         post '/login', to: "authentication#create"
 
         resources :disabilities, only: [:index,:create]
         resources :interests, only: [:create]
+        resources :matches, only: [:index]
 
         resources :users
       end

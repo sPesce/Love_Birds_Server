@@ -65,7 +65,7 @@ class Api::V1::UsersController < ApplicationController
       {
         :interests => {:only => [:name]},
         :disabilities => {:only => [:name]}
-      }, only: [:first,:last,:bio,:zip_code,:pic])
+      }, only: [:email,:first,:last,:bio,:zip_code,:pic])
     end
   end
 
@@ -117,6 +117,38 @@ class Api::V1::UsersController < ApplicationController
 
     return render json: {success: "The current user is no longer a caretaker to #{user2.email}"}
   end
+  # -1: denied
+  # 0: not accepted
+  # 1: accepted but has caretaker
+  # 2: accepted, if has caretaker, also accepted
+  def initialize_match
+    sender = find_user
+    reciever = User.find_by(initialize_match_params)
+    return render json: {error: 'account not found'} unless (sender && reciever)
+    
+    sender_status = 2
+    reciever_status = 0
+    
+    if(sender.caretaker && sender.caretaker.accepted == 'BOTH')
+      sender_status = 1
+    end
+    
+    match = Match.new
+    match.user = sender
+    match.matched_user = reciever
+    match.sender_status = sender_status
+    match.reciever_status = reciever_status
+    return render json: {error: 'Problem with match create'} unless match.valid?
+
+    match.save
+    render json: {
+      sender: match.user.email,
+      reciever: match.matched_user.email,
+      sender_status: match.sender_status,
+      reciever_status: match.reciever_status
+    }
+
+  end
 
   private
   def user_params
@@ -125,6 +157,10 @@ class Api::V1::UsersController < ApplicationController
 
   def matching_params
     params.permit(:radius)
+  end
+
+  def initialize_match_params
+    params.require(:user).permit(:email)
   end
 
   def caretaker_params

@@ -21,7 +21,7 @@ class User < ApplicationRecord
   has_many :interests, through: :user_interests
 
   has_many :matches
-  has_many :matched_user, through: :matches
+  has_many :matched_users, through: :matches
 
   belongs_to :location, optional: true
 
@@ -98,6 +98,8 @@ class User < ApplicationRecord
   private
   #used in get_closest, just adds radius to query
   def constraints(radius = nil,user)
+    return false if (self.matched_users.include?(user))
+    return false if (user.matched_users.include?(self))
     if(self.match_gender != 'any' && self.match_gender != user.gender)
       return false
     end
