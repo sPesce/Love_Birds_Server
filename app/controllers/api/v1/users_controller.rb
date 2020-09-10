@@ -52,6 +52,10 @@ class Api::V1::UsersController < ApplicationController
         
   end
 
+  def show
+    user = User.find_by(public_user_params)
+  end
+
   def get_closest_matches
     user = find_user
     render json: {error: "Invalid Token, no user found"} unless user
@@ -153,6 +157,10 @@ class Api::V1::UsersController < ApplicationController
   private
   def user_params
     params.require(:user).permit(:email,:password,:caretaker,:first,:last,:bio,:zip_code,:gender,:match_gender)  
+  end
+
+  def public_user_params
+    params.require(:user).permit(:email)
   end
 
   def matching_params
