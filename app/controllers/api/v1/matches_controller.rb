@@ -24,7 +24,8 @@ class Api::V1::MatchesController < ApplicationController
         sender_status: m.sender_status,
         reciever_status: m.reciever_status,
         sender_name: m.user.first,
-        id: m.id
+        id: m.id,
+        sender_last: m.user.last
       }
       match_list.push(currentMatch)
     end
