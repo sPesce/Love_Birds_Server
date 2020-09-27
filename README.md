@@ -1,4 +1,4 @@
-# Love Birds Server
+<h2> Love Birds Server </h2>
 <p align="center">
   <img src="https://raw.githubusercontent.com/sPesce/Love_Birds_Client/master/src/images/logoBig.png"/>
 </p>
