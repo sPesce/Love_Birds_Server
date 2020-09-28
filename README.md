@@ -12,6 +12,7 @@
 ### 🏠 [Homepage](https://github.com/sPesce/Love_Birds_Client)
 
 ## Install
+PostgreSQL is required [link](https://blog.timescale.com/tutorials/how-to-install-psql-on-mac-ubuntu-debian-windows/)
 ```sh
 bundle install
 rails db:create
