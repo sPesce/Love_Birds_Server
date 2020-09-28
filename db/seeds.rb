@@ -8,16 +8,19 @@
 require 'csv'
 require 'faker'
 
-puts "Enter seed type ('only-zips', 'full-destructive <# of Users>', 'only-users <# of Users>'"
-inp = gets
-seedInput = inp.chomp.split(' ')
+# puts "Enter seed type ('only-zips', 'full-destructive <# of Users>', 'only-users <# of Users>')"
+# inp = gets
+seedInput = ['full-destructive',1500]
 
-seed = {
-  'only-zips': 0,
-  'full-destructive': 1,
-  'only-users': 2
-}[seedInput[0]]
-
+seedNumber = {
+  'only-zips' => 0,
+  'full-destructive' => 1,
+  'only-users' => 2
+}
+seed = seedNumber[seedInput[0]]
+print "seed option #{seed} "
+print "user size: #{seedInput[1]}" if seed > 0
+puts ""
 
 if(seed != 2)
   puts "seeding locations, this may take a minute..."
@@ -128,11 +131,10 @@ def match(male,other)
   end
 end
 if seed > 0
-  N = seedInput[1]
-  puts 'seeding caretakers...'
-  N.times do |n|
-    if(n<10)
-      caretributes =
+
+  careBar = TTY::ProgressBar.new("Seeding Caretakers [:bar]", total: 40)
+  10.times do |n|
+    caretributes =
       {
         first: Faker::Name.unique.first_name,
         last: Faker::Name.last_name,
@@ -143,12 +145,16 @@ if seed > 0
       }
       u = User.new(caretributes)
       u.email = u.first + '@gmail.com'
-      u.save 
-    end
-    if(n == 10)
-      puts '>'
-      puts 'seeding girls and guys'
-    end
+      u.save
+      careBar.advance(4) 
+  end
+  
+  barSize = N >= 40 ? 40 : N
+  usrBar = TTY::ProgressBar.new("Seeding Users [:bar]", total: barSize)
+  
+  N = seedInput[1]
+  N.times do |n|
+    usrBar.advance if (n % (N / barSize) == 0)
     
     male = (n <= N/2)
     other = (n > (N - 10))  
@@ -217,7 +223,7 @@ if seed > 0
       print '-'
     end
   end
-  print '>'
+  print '---------->'
 
   puts 'seeding matches'
   reciever = User.all[15]
