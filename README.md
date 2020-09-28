@@ -1,24 +1,40 @@
-# README
+<h1 align="center">Love Birds Server</h1>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/sPesce/Love_Birds_Client/master/src/images/logoBig.png"/>
+</p>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000" />
+  <a href="https://choosealicense.com/licenses/mit/" target="_blank">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+  </a>
+</p>
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+### 🏠 [Homepage](https://github.com/sPesce/Love_Birds_Client)
 
-Things you may want to cover:
+## Install
+PostgreSQL is required [link](https://blog.timescale.com/tutorials/how-to-install-psql-on-mac-ubuntu-debian-windows/)
+```sh
+bundle install
+rails db:create
+rails db:seed
+```
 
-* Ruby version
+## Usage
+> Note: this server must be run on port 3000 (default)
+```sh
+rails s
+```
 
-* System dependencies
+## Author
 
-* Configuration
+👤 **Steve Pesce:** [Website](https://medium.com/@stevepesce879) |  [GitHub](https://gist.github.com/sPesce) | 
+[LinkedIn](https://www.linkedin.com/in/steve-pesce/)
 
-* Database creation
+## Show your support
 
-* Database initialization
+Give a ⭐️ if this project helped you!
 
-* How to run the test suite
+## 📝 License
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Copyright © 2020 [Steve Pesce](https://gist.github.com/sPesce).<br />
+This project is [MIT](https://choosealicense.com/licenses/mit/) licensed.
