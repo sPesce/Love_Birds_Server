@@ -1,41 +1,20 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
 require 'csv'
 require 'faker'
 
-# puts "Enter seed type ('only-zips', 'full-destructive <# of Users>', 'only-users <# of Users>')"
-# inp = gets
 seedInput = ['full-destructive',1500]
 
+#TODO: convert this to boolean
 seedNumber = {
-  'only-zips' => 0,
+  #'only-zips' => 0, not possible
   'full-destructive' => 1,
   'only-users' => 2
 }
 seed = seedNumber[seedInput[0]]
-print "seed option #{seed} "
-print "user size: #{seedInput[1]}" if seed > 0
-puts ""
+N = seedInput[1]
+puts "seed option #{seed} user size: #{seedInput[1]}"
 
-if(seed != 2)
-  puts "seeding locations, this may take a minute..."
-  CSV.foreach(Rails.root.join('lib/locations_seeds.csv'), headers: true) do |row|
-      Location.create( {
-        zip: row["ZIP"], 
-        lat: row["LAT"],
-        long: row["LNG"]
-      } )   
-  end
-  puts "finished seeding locations"
-else
-  puts 'skipping seeding locations because it takes forever and its never edited'
-end
-puts 'destroying tables'
+
+tables = 
 [
   UserInterest,
   UserDisability,
@@ -44,7 +23,42 @@ puts 'destroying tables'
   Disability,
   Match,
   User
-].each{|table| table.destroy_all}
+]
+destroy_bar_size = tables.length + ((seed == 2 && Location.count < 10000) ? 0 : 10)
+destroy_bar = TTY::ProgressBar.new("Destroying Tables: [:bar]", total: destroy_bar_size)
+
+tables.each do |table| 
+  table.destroy_all
+  destroy_bar.advance
+end
+if(seed != 2)
+  Location.all.select(:id).find_in_batches(batch_size: Location.count/10) do |ids|
+    Location.where(id: ids).delete_all
+    destroy_bar.advance
+  end 
+  puts "finished destroying locations"
+end
+
+
+if(seed != 2)
+  puts "seeding locations, this may take a minute...\n\n"
+  Location.destroy_all
+  zipBar = TTY::ProgressBar.new("Seeding Locations: [:bar]", total: 9)
+  (1..9).each do |n|
+    CSV.foreach(Rails.root.join("lib/locations_seeds_#{n}.csv"), headers: true) do |row|
+        Location.create( {
+          zip: row["ZIP"], 
+          lat: row["LAT"],
+          long: row["LNG"]
+        } )   
+    end
+    zipBar.advance  
+  end
+  puts "\nfinished seeding locations"
+else
+  puts 'skipping seeding locations because it takes forever and its never edited'
+end
+
 #generate standard users
 zipCodes =
 [
@@ -152,7 +166,6 @@ if seed > 0
   barSize = N >= 40 ? 40 : N
   usrBar = TTY::ProgressBar.new("Seeding Users [:bar]", total: barSize)
   
-  N = seedInput[1]
   N.times do |n|
     usrBar.advance if (n % (N / barSize) == 0)
     
