@@ -8,8 +8,18 @@
 require 'csv'
 require 'faker'
 
+puts "Enter seed type ('only-zips', 'full-destructive <# of Users>', 'only-users <# of Users>'"
+inp = gets
+seedInput = inp.chomp.split(' ')
 
-if(!Location.all[0])
+seed = {
+  'only-zips': 0,
+  'full-destructive': 1,
+  'only-users': 2
+}[seedInput[0]]
+
+
+if(seed != 2)
   puts "seeding locations, this may take a minute..."
   CSV.foreach(Rails.root.join('lib/locations_seeds.csv'), headers: true) do |row|
       Location.create( {
@@ -37,10 +47,7 @@ zipCodes =
 [
   '19102', '19145', '19104', 
   '19106', '19114', '19115',
-  '19082', '19111', '92029',
-  '92071', '92101', '91911',
-  '91932', '92025', '90210',
-  '90005', '90010', '90012',
+  '19082', '19111',   
   '22206', '22302', '22304',
   '22305', '22306', '22307'
   
@@ -60,6 +67,7 @@ if !errors.empty?
 else
 puts "...everything looks fine"
 end
+
 
 #-----------users interests disabilities ---------------------------
 
@@ -119,108 +127,110 @@ def match(male,other)
     return ['male','female','any','other'].sample
   end
 end
+if seed > 0
+  N = seedInput[1]
+  puts 'seeding caretakers...'
+  N.times do |n|
+    if(n<10)
+      caretributes =
+      {
+        first: Faker::Name.unique.first_name,
+        last: Faker::Name.last_name,
+        email: Faker::Internet.unique.safe_email,
+        password: 'care',
+        validated: true,
+        account_type: 'caretaker'
+      }
+      u = User.new(caretributes)
+      u.email = u.first + '@gmail.com'
+      u.save 
+    end
+    if(n == 10)
+      puts '>'
+      puts 'seeding girls and guys'
+    end
+    
+    male = (n <= N/2)
+    other = (n > (N - 10))  
 
-puts 'seeding caretakers...'
-60.times do |n|
-  if(n == 10)
-    puts '>'
-    puts 'seeding girls and guys'
-  end
-  if(n<10)
-    caretributes =
+    attributes = 
     {
-      first: Faker::Name.unique.first_name,
+      validated: true,
+      account_type: 'standard',
+      first: male ? Faker::Name.unique.male_first_name : Faker::Name.female_first_name,
       last: Faker::Name.last_name,
       email: Faker::Internet.unique.safe_email,
-      password: 'care',
-      validated: true,
-      account_type: 'caretaker'
+      password: 'qweasd123',
+      zip_code: zipCodes.sample,
+      gender: male ? 'male' : (other ? 'other' : 'female'),
+      match_gender: match(male,other),
     }
-    u = User.new(caretributes)
+    u = User.new(attributes)
+    u.pic = pic_address('',u.gender,[0..100].sample)
     u.email = u.first + '@gmail.com'
-    u.save 
-  end
-
-  male = (n <= 31)
-  other = (n > 57)  
-
-  attributes = 
-  {
-    validated: true,
-    account_type: 'standard',
-    first: male ? Faker::Name.unique.male_first_name : Faker::Name.female_first_name,
-    last: Faker::Name.last_name,
-    email: Faker::Internet.unique.safe_email,
-    password: 'qweasd123',
-    zip_code: zipCodes.sample,
-    gender: male ? 'male' : (other ? 'other' : 'female'),
-    match_gender: match(male,other),
-  }
-  u = User.new(attributes)
-  u.pic = pic_address('',u.gender,n)
-  u.email = u.first + '@gmail.com'
-  u.save
-  
-  myInterests = []
-  rand(2..5).times do
-    interest = interests.sample
-    while (myInterests.include?(interest))
+    u.save
+    
+    myInterests = []
+    rand(2..5).times do
       interest = interests.sample
+      while (myInterests.include?(interest))
+        interest = interests.sample
+      end
+      myInterests.push(interest)    
+      u.interests.build(name: interest)
     end
-    myInterests.push(interest)    
-    u.interests.build(name: interest)
-  end
 
-  u.disabilities.build(name: disabilities.sample)
-  u.save
+    u.disabilities.build(name: disabilities.sample)
+    u.save
 
-  meet = ['meet','find'].sample
-  looking_sentence = 
-  [
-    'I am looking forward to finding ',
-    'I want to ' + meet,
-    'I am here to ' + meet,
-    'I would like to ' + meet,
-    'I am hoping to ' + meet
-  ].sample  
-  myBio = ['Hello', 'Hola', 'Howdy', 'Hi there', 'Greetings'].sample + ', my name is ' + u.full_name 
-  if(!u.interests)
-    puts "user no interest #{u.full_name} + #{myInterests}"
-  end
-  myBio += ". My interests are #{u.interests_string}.  " + looking_sentence
-  myBio += " " + (u.match_gender == 'male' ? 'a guy' : (u.match_gender == 'female' ? 'a girl' : 'someone'))
-  
-  myBio += ". I am here for "
-  myBio +=
-  [
-    "finding a casual relationship!!!",
-    "finding a serious relationship.",
-    "finding friends!"
-  ].sample
+    meet = ['meet','find'].sample
+    looking_sentence = 
+    [
+      'I am looking forward to finding ',
+      'I want to ' + meet,
+      'I am here to ' + meet,
+      'I would like to ' + meet,
+      'I am hoping to ' + meet
+    ].sample  
+    myBio = ['Hello', 'Hola', 'Howdy', 'Hi there', 'Greetings'].sample + ', my name is ' + u.full_name 
+    if(!u.interests)
+      puts "user no interest #{u.full_name} + #{myInterests}"
+    end
+    myBio += ". My interests are #{u.interests_string}.  " + looking_sentence
+    myBio += " " + (u.match_gender == 'male' ? 'a guy' : (u.match_gender == 'female' ? 'a girl' : 'someone'))
+    
+    myBio += ". I am here for "
+    myBio +=
+    [
+      "finding a casual relationship!!!",
+      "finding a serious relationship.",
+      "finding friends!"
+    ].sample
 
-  u.bio = myBio
-  u.save
-  if(!u.location)
-    u.destroy
-    puts "#{n}th record created was bad and needs to be destroyed!"
+    u.bio = myBio
+    u.save
+    if(!u.location)
+      u.destroy
+      puts "#{n}th record created was bad and needs to be destroyed!"
+    end
+    if (n % 5) 
+      print '-'
+    end
   end
-  if (n % 5) 
-    print '-'
+  print '>'
+
+  puts 'seeding matches'
+  reciever = User.all[15]
+  senders = reciever.get_closest[1..10]
+
+  senders.each do |s|
+    Match.create(user_id: s.id,
+    matched_user_id: reciever.id,
+    sender_status: 2,
+    reciever_status: 0)
   end
+  puts "15th user got 10 match requests from his closest potential matches"
 end
-print '>'
-
-puts 'seeding matches'
-reciever = User.all[15]
-senders = reciever.get_closest[1..10]
-
-senders.each do |s|
-  Match.create(user_id: s.id,
-  matched_user_id: reciever.id,
-  sender_status: 2,
-  reciever_status: 0)
-end
-puts "15th user got 10 match requests from his closest potential matches"
 
 puts '-------------------------------------------------'
 puts '-----------SEEDING-------Successfull-------------'
