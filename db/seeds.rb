@@ -1,7 +1,7 @@
 require 'csv'
 require 'faker'
 #---------------------
-only_users = false;#if false, also seeds locations
+only_users = true;#false: (re)seed Locations in addition to #true: seed everything but Locations
 N = 1500
 #---------------------
 
@@ -174,7 +174,7 @@ N.times do |n|
     match_gender: match(male,other),
   }
   u = User.new(attributes)
-  u.pic = pic_address('',u.gender,[0..100].sample)
+  u.pic = pic_address('',u.gender,rand(99))
   u.email = u.first + '@gmail.com'
   puts ('error with user ' + attributes.first) if !u.valid?
   u.save
