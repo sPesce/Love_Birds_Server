@@ -1,12 +1,15 @@
 require 'csv'
 require 'faker'
 #---------------------
-only_users = true;
+only_users = false;#if false, also seeds locations
 N = 1500
 #---------------------
 
-puts "seed option #{only_users ? "only users" : "users and locations" } user size: #{N}"
+puts '-------------------------------------------------'
+puts '-------------------SEEDING BEGIN-----------------'
+puts '-------------------------------------------------'
 
+puts "seed option <#{only_users ? "only users" : "users and locations" }> | user size: #{N}\n"
 
 tables = 
 [
@@ -29,11 +32,8 @@ if(!only_users)
   Location.all.select(:id).find_in_batches(batch_size: Location.count/10) do |ids|
     Location.where(id: ids).delete_all
     destroy_bar.advance
-  end 
-  puts "finished destroying locations"
+  end
 
-  puts "seeding locations, this may take a minute...\n\n"
-  Location.destroy_all
   zipBar = TTY::ProgressBar.new("Seeding Locations: [:bar]", total: 9)
   (1..9).each do |n|
     CSV.foreach(Rails.root.join("lib/locations_seeds_#{n}.csv"), headers: true) do |row|
@@ -43,11 +43,11 @@ if(!only_users)
           long: row["LNG"]
         } )   
     end
-    zipBar.advance  
+  zipBar.advance
   end
-  puts "\nfinished seeding locations"
+  
 else
-  puts 'skipping seeding locations because it takes forever and its never edited'
+  puts "\nskipping seeding locations because it takes forever and its never edited\n"
 end
 
 #generate standard users
@@ -73,7 +73,7 @@ if !errors.empty?
   errors.each{|err| puts err}
   puts '\n--------------------------'
 else
-puts "...everything looks fine"
+puts "...everything looks fine\n"
 end
 
 
@@ -220,26 +220,24 @@ N.times do |n|
   u.save
   if(!u.location)
     puts "#{n}th record created was bad and needs to be destroyed, not associated with location!"
-  end
-  if (n % 5) 
-    
-  end
-
-
-  puts 'seeding matches'
-  reciever = User.all[15]
-  senders = reciever.get_closest[1..10]
-
-  senders.each do |s|
-    Match.create(user_id: s.id,
-    matched_user_id: reciever.id,
-    sender_status: 2,
-    reciever_status: 0)
-  end
-  puts "15th user got 10 match requests from his closest potential matches"
+  end 
 end
 
 
+puts 'seeding matches'
+reciever = User.all[15]
+senders = reciever.get_closest[1..10]
+
+senders.each do |s|
+  Match.create(user_id: s.id,
+  matched_user_id: reciever.id,
+  sender_status: 2,
+  reciever_status: 0)
+end
+puts "15th user got 10 match requests from his closest potential matches"
+
+
+
 puts '-------------------------------------------------'
-puts '-----------SEEDING-------Successfull-------------'
+puts '------------------SEEDING SUCCESS----------------'
 puts '-------------------------------------------------'
