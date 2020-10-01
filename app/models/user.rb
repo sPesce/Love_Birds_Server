@@ -30,6 +30,11 @@ class User < ApplicationRecord
     Match.where(user_id: self.id) + Match.where(matched_user_id: self.id)
   end
 
+  def all_matches
+    id = (self.account_type == 'standard') ? self.id : self.caretaker_to.id
+    Match.where(matched_user_id: id).or(Match.where(user_id: id))
+  end
+
   #because a user can either be the user or the caretaker in user caretaker,
   #this method should be used to find a user_caretaker from a user
   def find_user_caretaker

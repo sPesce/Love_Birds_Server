@@ -1,3 +1,4 @@
+#Manual indicates that this serializer is not using fast json api
 class MatchSerializerManual
   def initialize(match)
     @match = match
