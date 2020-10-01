@@ -27,7 +27,7 @@ class MatchSerializerManual
         user: user_options,
         matched_user: user_options 
       },
-      only: [:sender_status,:reciever_status,:updated_at]
+      only: [:id,:sender_status,:reciever_status,:updated_at]
     }
     return @match.to_json(options)
   end
