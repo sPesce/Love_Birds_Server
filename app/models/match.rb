@@ -8,6 +8,11 @@ class Match < ApplicationRecord
   belongs_to :matched_user, class_name: "User"
 
   has_many :messages
+
+  def other_user(user)
+    other_user = ([self.user_id,self.matched_user_id] - [user.id])[0]
+    return User.find(other_user)
+  end
   
   private
   def distinct_matches

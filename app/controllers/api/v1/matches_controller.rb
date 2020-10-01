@@ -17,15 +17,16 @@ class Api::V1::MatchesController < ApplicationController
     end
     return render json: {error: 'no matches'} if !matches
 
-    matches.each do |m| 
+    matches.each do |m|
+      other_user = m.other_user(user) 
       currentMatch = 
       {
-        sender: m.user.email,
+        sender_email: m.user.email,        
+        reciever_email: m.matched_user.email,  
         sender_status: m.sender_status,
-        reciever_status: m.reciever_status,
-        sender_name: m.user.first,
+        reciever_status: m.reciever_status,  
         id: m.id,
-        sender_last: m.user.last
+        user: UserSerializerManual.new(other_user).to_serialized_json
       }
       match_list.push(currentMatch)
     end
