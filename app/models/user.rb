@@ -75,12 +75,12 @@ class User < ApplicationRecord
   end
 
   #get closest other users, if radius given, then only get ppl close enough
-  def get_closest(radius = 999999999999999999999999999999999999999.9)
+  def get_closest(radius = nil)
     
-    users = User.all.select{|usr| constraints(radius,usr)}
-    return false if !users
-
-    users.sort_by{|usr| self.distance_to(usr)}[0..(users.length < 25 ? users.length - 1 : 24)]
+    users = User.all.select{|usr| constraints(usr,radius)}
+    return users
+    #move this
+    #users.sort_by{|usr| self.distance_to(usr)}[0..(users.length < 25 ? users.length - 1 : 24)]
   end
 
   def caretaker_of
@@ -100,11 +100,11 @@ class User < ApplicationRecord
     memo = interests[0,interests.length - 1].join(", ")
     memo += " and " + interests[-1]
     memo
-  end  
+  end    
 
   private
   #used in get_closest, just adds radius to query
-  def constraints(radius = nil,user)
+  def constraints(user,radius)
     return false if (self.matched_users.include?(user))
     return false if (user.matched_users.include?(self))
     if(self.match_gender != 'any' && self.match_gender != user.gender)
@@ -114,7 +114,7 @@ class User < ApplicationRecord
       return false
     end
     return false if (self.id == user.id)
-    return false if ( self.distance_to(user) > radius)
+    return false if ( !!radius && self.distance_to(user) > radius)
     return true    
   end
 end

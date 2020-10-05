@@ -21,13 +21,7 @@ class Api::V1::MatchesController < ApplicationController
     match.save
     m = match
 
-    render json: {
-      sender: m.user.email,
-      sender_status: m.sender_status,
-      reciever_status: m.reciever_status,
-      sender_name: m.user.first,
-      id: m.id
-    }
+    render json: MatchSerializerManual.new(match).to_serialized_json
     
   end
 
